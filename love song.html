@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Only For You 💖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #8350e1 0%, #c63f78 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Heart Animation */
+        .main-heart {
+            font-size: 5rem;
+            animation: beat 1s infinite;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.6);
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Glass Container */
+        .container {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            color: #043e70;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background-color: #100f0f;
+            color: #d2090c;
+            border: none;
+            padding: 12px 45px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .sub-text {
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            background: rgba(104, 4, 4, 0.886);
+            padding: 4px 12px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .lyrics-text {
+            font-size: 1.5rem;
+            font-weight: 500;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgSong" src="nawab-song.mp3" preload="auto"></audio>
+
+    <div id="screen1" class="container">
+        <div class="main-heart">💝</div>
+        <h2>Do You Want a Gift?</h2>
+        <p>I made this specially for you 💕</p>
+        <button class="btn" onclick="startMagic()">YES</button>
+    </div>
+
+    <div id="screen2" class="container hidden">
+        <div class="main-heart">❤️</div>
+        <div class="sub-text">Only For You 🥰💐</div>
+        <div id="lyricsBox" class="lyrics-text">Loading...</div>
+    </div>
+
+    <script>
+        // Yahan aap apne naye song ki lyrics aur unka timing (seconds me) badal sakte hain
+        const lyricsData = [
+            { time: 0, text: "Arey oo SAJANIYA Suna 🎵" },
+            { time: 2, text: "Tohra Criteria Mein Fit Hum Ho Jaayi... 💖" },
+            { time: 6, text: "Tohra Criteria Mein Fit Hum Ho Jaayi! 😉" },
+            { time: 9, text: "Sajni Thoda Sa ... 🌸" },
+            { time: 12, text: "Sajni Thoda Sa! ✨" },
+            { time: 15, text: "Sajni Thoda Sa Tu Hu Compromise Kara....💖" },
+            { time: 20, text: "Sajni Thoda Sa Tu Hu Compromise Kara....💖" },
+            { time: 25, text: "Sajni Thoda Sa Tu Hu Compromise Kara....💖" },
+            { time: 30, text: "I Love You Madam ji...💐" },
+            { time: 32, text: "A & G..." },
+            { time: 33, text: "developed by MD AMANAT ..." },
+        ];
+
+        const song = document.getElementById("bgSong");
+        const screen1 = document.getElementById("screen1");
+        const screen2 = document.getElementById("screen2");
+        const lyricsBox = document.getElementById("lyricsBox");
+
+        let startTime = 0;
+        let timerInterval;
+
+        function startMagic() {
+            screen1.classList.add("hidden");
+            screen2.classList.remove("hidden");
+            
+            // Audio play karne ki koshish
+            song.play().then(() => {
+                // Agar audio load ho gaya, toh real audio time se lyrics sync hogi
+                timerInterval = setInterval(syncWithAudio, 100);
+            }).catch(error => {
+                console.log("Audio not found or blocked, switching to auto-timer mode.");
+                // BACKUP: Agar song file nahi mili ya play nahi hui, toh automatic timer chalega
+                startTime = Date.now();
+                timerInterval = setInterval(syncWithTimer, 100);
+            });
+        }
+
+        // Method 1: Real Song Time ke saath sync
+        function syncWithAudio() {
+            let currentTime = song.currentTime;
+            updateLyricsDisplay(currentTime);
+        }
+
+        // Method 2: Backup Timer (agar audio file crash ho jaye tab bhi lyrics chalegi)
+        function syncWithTimer() {
+            let currentTime = (Date.now() - startTime) / 1000; // seconds me
+            updateLyricsDisplay(currentTime);
+        }
+
+        // Common function text update karne ke liye
+        function updateLyricsDisplay(time) {
+            let currentLine = lyricsData[0].text;
+            for (let i = 0; i < lyricsData.length; i++) {
+                if (time >= lyricsData[i].time) {
+                    currentLine = lyricsData[i].text;
+                }
+            }
+            // Baar baar innerHTML change hone se screen flicker na kare isliye check
+            if(lyricsBox.innerHTML !== currentLine) {
+                lyricsBox.innerHTML = currentLine;
+            }
+        }
+    </script>
+</body>
+</html>
